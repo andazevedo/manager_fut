@@ -12,8 +12,10 @@ export type ReservationStore = [
     end_hour: string;
     observations?: string | null;
     responsible_id: string;
-    sports_cout_id: string;
-    responsible: ResponsibleStore[];
+    responsible_name: string;
+    responsible_address: string;
+    responsible_phone: string;
+    responsible_email: string;
   }
 ];
 
@@ -31,7 +33,7 @@ export const useReservationStore = create(
       remove: () => set(() => ({ data: null })),
     }),
     {
-      name: "manager.fut:districts",
+      name: "manager.fut:reservations",
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

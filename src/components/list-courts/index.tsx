@@ -12,6 +12,7 @@ import { Clock } from "react-native-feather";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "@rneui/themed";
 import { SportCourt } from "@/storage/district-store";
+import { api } from "@/server/api";
 
 interface ListCourtProps {
   data: {

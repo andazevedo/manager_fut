@@ -17,6 +17,11 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     maxWidth: "80%",
   },
+  separator: {
+    height: 1,
+    backgroundColor: "#27272A",
+    marginVertical: 16,
+  },
   calendar: {
     backgroundColor: "transparent",
   },
@@ -45,5 +50,30 @@ export const styles = StyleSheet.create({
   selectedDay: {
     backgroundColor: "#f06543",
     fontWeight: "bold",
+  },
+
+  listContainer: {
+    width: "100%",
+  },
+
+  listItemContainer: {
+    padding: 15,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+  },
+
+  listItemText: {
+    fontSize: 16,
+    color: "#333",
+  },
+
+  listSeparator: {
+    height: 4,
+  },
+  sectionHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    color: "#fff",
   },
 });

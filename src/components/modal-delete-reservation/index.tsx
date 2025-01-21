@@ -4,43 +4,40 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  FlatList,
   Modal,
-  SafeAreaView,
-  ScrollView,
   Alert,
   ModalProps,
 } from "react-native";
-import { AtSign, Plus, X, Clock, Calendar, User } from "react-native-feather";
+import { X } from "react-native-feather";
 import { styles } from "@/components/modal-delete-reservation/style";
-import { DateData } from "react-native-calendars";
-import { Picker } from "@react-native-picker/picker";
-import { ResponsibleStore } from "@/storage/responsible-store";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { api } from "@/server/api";
+import { Loading } from "../loading/loading";
 
 type Props = ModalProps & {
   visible: boolean;
   onClose: () => void;
-  infosResponsible: [
-    {
-      id: string;
-      name: string;
-      email: string;
-      phone: string;
-      address: string;
-    }
-  ];
+  reservationId: string | undefined;
 };
 
 export function DeleteModal({
   visible = false,
   onClose,
+  reservationId,
   children,
-  accessibilityLargeContentTitle,
-  infosResponsible,
+
   ...rest
 }: Props) {
   const [comment, setComment] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { districtId, selectedDate, courtId, name, opening, closest } =
+    useLocalSearchParams();
+  const router = useRouter();
+
+  const DISTRICT_ID = districtId;
+  const COURT_ID = courtId;
+  const RESERVATION_ID = reservationId;
 
   function validateInputs() {
     if (!comment.trim()) {
@@ -49,6 +46,52 @@ export function DeleteModal({
     }
 
     return true;
+  }
+  function handlePush() {
+    onClose();
+
+    router.push({
+      pathname: "/",
+    });
+  }
+
+  async function handleDisableReservation() {
+    if (!validateInputs()) return;
+
+    try {
+      setIsLoading(true);
+      console.log(
+        "body: ",
+        `https://42ee-200-239-65-161.ngrok-free.app/districts/${DISTRICT_ID}/sports_couts/${COURT_ID}/sports_cout_has_responsibles/${RESERVATION_ID}/disabled`,
+        null,
+        {
+          params: {
+            enabled: 0,
+            observations: comment,
+          },
+        }
+      );
+      const { data } = await api.patch(
+        `districts/${DISTRICT_ID}/sports_couts/${COURT_ID}/sports_cout_has_responsibles/${RESERVATION_ID}/disabled`,
+        null,
+        {
+          params: {
+            enabled: 0,
+            observations: comment,
+          },
+        }
+      );
+
+      if (data.message === "Horário agendado foi excluído com sucesso!") {
+        Alert.alert("Sucesso", "Reserva excluída com sucesso!", [
+          { text: "OK", onPress: () => handlePush() },
+        ]);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -80,9 +123,14 @@ export function DeleteModal({
             <TouchableOpacity
               style={styles.deleteButton}
               activeOpacity={0.7}
-              onPress={validateInputs}
+              onPress={handleDisableReservation}
+              disabled={isLoading}
             >
-              <Text style={styles.deleteButtonText}>Excluir Reserva</Text>
+              {isLoading ? (
+                <Loading color={"#fff"} />
+              ) : (
+                <Text style={styles.deleteButtonText}>Excluir Reserva</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

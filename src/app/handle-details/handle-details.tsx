@@ -24,6 +24,7 @@ import {
   useResponsibleStore,
 } from "@/storage/responsible-store";
 import { useReservationStore } from "@/storage/reservation-store";
+import { Loading } from "@/components/loading/loading";
 
 export default function HandleDetails() {
   const router = useRouter();
@@ -64,8 +65,10 @@ export default function HandleDetails() {
       end_hour: string;
       observations?: string | null;
       responsible_id: string;
-      sports_cout_id: string;
-      responsible: ResponsibleStore[];
+      responsible_name: string;
+      responsible_address: string;
+      responsible_phone: string;
+      responsible_email: string;
     }[]
   >([]);
 
@@ -73,32 +76,12 @@ export default function HandleDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-
   const [isDataReady, setIsDataReady] = useState(false);
 
-  const LIST_DATA = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      enabled: 1,
-      init_hour: "08:00",
-      end_hour: "09:00",
-      observations: null,
-      responsible_id: "uuid",
-      sports_cout_id: "uuid",
-    },
-    {
-      id: "db7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      enabled: 1,
-      init_hour: "08:00",
-      end_hour: "09:00",
-      observations: null,
-      responsible_id: "uuid",
-      sports_cout_id: "uuid",
-    },
-  ];
-
   function openConfirmReservationModal() {
-    if (!validateInputs()) return;
+    if (!validateInputs()) {
+      return;
+    }
     setIsModalOpen(true);
   }
 
@@ -107,11 +90,11 @@ export default function HandleDetails() {
   }
 
   function validateInputs() {
-    if (!selectedResponsible) {
+    if (selectedResponsible.email.length <= 0) {
       Alert.alert("Erro", "Por favor, selecione um responsável.");
       return false;
     }
-    if (!selectedInterval) {
+    if (selectedInterval.opening.length <= 0) {
       Alert.alert("Erro", "Por favor, selecione um intervalo de horário.");
       return false;
     }
@@ -186,7 +169,8 @@ export default function HandleDetails() {
           params: { by_date: americanDateFormat(formattedDate) },
         }
       );
-      reservationStore.save(data);
+      //reservationStore.save(data);
+      setListInfoDaily(data);
     } catch (err) {
       console.log(err);
     } finally {
@@ -202,8 +186,10 @@ export default function HandleDetails() {
       end_hour: infos.end_hour,
       observations: infos.observations,
       responsible_id: infos.responsible_id,
-      sports_cout_id: infos.sports_cout_id,
-      responsible: infos.responsible,
+      responsible_name: infos.responsible_name,
+      responsible_address: infos.responsible_address,
+      responsible_phone: infos.responsible_phone,
+      responsible_email: infos.responsible_email,
     }));
     setListInfoDaily(extractedInfos || []);
   }, []);
@@ -272,12 +258,21 @@ export default function HandleDetails() {
           <Text style={styles.headerText}>Lista de horários para este dia</Text>
         </View>
         <View>
-          {isDataReady && (
+          {!isLoading ? (
             <ListReservations
               data={listInfoDaily}
               responsibleInfos={selectedResponsible}
               reservationInfo={selectedInterval}
             />
+          ) : (
+            <View
+              style={{
+                width: "100%",
+                paddingTop: "50%",
+              }}
+            >
+              <Loading color={"#fff"} />
+            </View>
           )}
         </View>
 

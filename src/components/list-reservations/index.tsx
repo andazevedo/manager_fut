@@ -1,19 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  Modal,
-  ScrollView,
-} from "react-native";
-import { X } from "react-native-feather";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { styles } from "@/components/list-reservations/style";
 
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ModalReservation } from "../modal-infos";
-import { ResponsibleStore } from "@/storage/responsible-store";
+import { useLocalSearchParams } from "expo-router";
 
 type ListReservationsProps = {
   data: {
@@ -23,8 +14,10 @@ type ListReservationsProps = {
     end_hour: string;
     observations?: string | null;
     responsible_id: string;
-    sports_cout_id: string;
-    responsible: ResponsibleStore[];
+    responsible_name: string;
+    responsible_address: string;
+    responsible_phone: string;
+    responsible_email: string;
   }[];
   responsibleInfos: {
     id: string;
@@ -46,8 +39,16 @@ export function ListReservations(props: ListReservationsProps) {
   const [isModalReservationsOpen, setIsModalReservationsOpen] = useState(false);
   const [reservationId, setReservationId] = useState("");
 
-  function openModalReservation(content: string) {
-    setReservationId(content);
+  const { districtId, courtId } = useLocalSearchParams();
+
+  const selectedDistrictId = Array.isArray(districtId)
+    ? districtId[0]
+    : districtId || "0";
+  const selectedCourtId = Array.isArray(courtId) ? courtId[0] : courtId || "0";
+
+  function openModalReservation(reservationId: string) {
+    setReservationId(reservationId);
+
     setIsModalReservationsOpen(true);
   }
 
@@ -55,7 +56,13 @@ export function ListReservations(props: ListReservationsProps) {
     setIsModalReservationsOpen(false);
   }
 
-  console.log(props.data[0].id);
+  const formatTime = (time: string) => {
+    return new Date(time).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -69,7 +76,8 @@ export function ListReservations(props: ListReservationsProps) {
           >
             <View style={styles.listItemContainer}>
               <Text style={styles.listItemText}>
-                {item.init_hour} - {item.end_hour}: {item.responsible_id}
+                {formatTime(item.init_hour)} - {formatTime(item.end_hour)}:{" "}
+                {item.responsible_name}
               </Text>
             </View>
           </TouchableOpacity>
@@ -84,6 +92,9 @@ export function ListReservations(props: ListReservationsProps) {
           reservationInfo={props.reservationInfo}
           onClose={closeModalReservation}
           isInserter={false}
+          reservationId={reservationId}
+          staticCourtId={selectedCourtId}
+          staticDistrictId={selectedDistrictId}
         />
       )}
     </SafeAreaView>
